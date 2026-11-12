@@ -1,17 +1,22 @@
 # Test Bring-Up — Pakan Ikan Otomatis
 
-Sketch untuk mengetes komponen yang sudah terpasang di breadboard:
+Sketch untuk mengetes komponen yang sudah terpasang di breadboard atau PCB lubang:
+
+Wiring breadboard: [`../../hardware/WIRING_BREADBOARD.md`](../../hardware/WIRING_BREADBOARD.md)
+
+Wiring PCB lubang (arsip): [`../../hardware/WIRING_PCB_LUBANG.md`](../../hardware/WIRING_PCB_LUBANG.md)
 
 - ESP32 Dev Module
 - OLED SSD1306 0.96" (I2C)
-- DS18B20 waterproof module
+- VL53L0X ToF (I2C)
+- DS18B20 waterproof module / probe + terminal block
 - TDS Meter V1.0 (analog)
 - Servo SG90
 - Tombol
 - Buzzer pasif
 - Kapasitor 1000 µF pada jalur servo
 
-**VL53L0X belum diuji** karena belum disolder. Nanti tinggal tambah sketch terpisah atau tambahkan library VL53L0X.
+Sketch sudah membaca VL53L0X lewat library `Adafruit_VL53L0X`. Cek alamat `0x29` lewat menu `i`, lalu tekan `v` untuk membaca jarak.
 
 ## 1. Library yang perlu dipasang
 
@@ -20,6 +25,7 @@ Di Arduino IDE → Library Manager:
 | Library | Keterangan |
 |---|---|
 | `Adafruit SSD1306` | plus dependency `Adafruit GFX Library` dan `Adafruit BusIO` |
+| `Adafruit_VL53L0X` | untuk sensor ToF VL53L0X |
 | `OneWire` | untuk DS18B20 |
 | `DallasTemperature` | untuk DS18B20 |
 | `ESP32Servo` | untuk SG90 |
@@ -46,6 +52,11 @@ Kalau memakai core 3.x, pastikan library `ESP32Servo` juga versi terbaru agar ko
 | OLED | GND | GND |
 | OLED | SDA | GPIO21 |
 | OLED | SCL | GPIO22 |
+| VL53L0X | VIN/VCC | 3.3 V |
+| VL53L0X | GND | GND |
+| VL53L0X | SDA | GPIO21 |
+| VL53L0X | SCL | GPIO22 |
+| VL53L0X | XSHUT (kalau ada) | 3.3 V |
 | DS18B20 | VCC | 3.3 V |
 | DS18B20 | GND | GND |
 | DS18B20 | DATA | GPIO4 |
@@ -68,7 +79,9 @@ Catatan:
 - Buzzer magnetic: tambahkan resistor 220 Ω seri. Buzzer piezo biasanya bisa langsung.
 - Jangan power servo dari 3.3 V.
 - Jangan hubungkan AOUT TDS ke 5 V.
-- Kalau DS18B20 module tidak punya pull-up, pasang dua resistor 10 kΩ paralel (= 5 kΩ) antara DATA dan 3.3 V.
+- DS18B20 probe + terminal block: pasang pull-up **4,7 kΩ antara DATA dan 3,3 V**, bukan seri dan bukan ke GND.
+- VL53L0X hanya 3,3 V. Kalau modul punya pin XSHUT, hubungkan ke 3,3 V, jangan ke GND. Pin GPIO/INT dibiarkan.
+- OLED dan VL53L0X berbagi SDA/SCL; alamatnya berbeda (OLED 0x3C/0x3D, VL53L0X 0x29).
 
 ## 4. Upload dan buka Serial Monitor
 
@@ -82,15 +95,17 @@ Output awal yang diharapkan:
 ```text
 ==========================================
   TEST BRING-UP PAKAN IKAN OTOMATIS
-  ESP32 + OLED + DS18B20 + TDS + SG90
-  Tombol + buzzer
+  ESP32 + OLED + DS18B20 + TDS + VL53L0X
+  Servo SG90 + tombol + buzzer
 ==========================================
-VL53L0X belum diuji di sketch ini.
 
 Scan I2C...
+  Ditemukan 0x29
   Ditemukan 0x3C
-  Total: 1 perangkat.
+  Total: 2 perangkat.
 OLED: OK di 0x3C.
+VL53L0X: init di 0x29...
+VL53L0X: OK di 0x29.
 DS18B20: 1 device terdeteksi.
 Servo: belum di-attach (tekan 's' untuk tes).
 ...
@@ -107,6 +122,7 @@ Ketik huruf lalu Enter:
 | `h` | tampilkan help |
 | `i` | scan ulang I2C |
 | `d` | baca DS18B20 sekarang |
+| `v` | baca VL53L0X sekarang |
 | `t` | baca TDS sekarang |
 | `b` | tes buzzer 3 beep |
 | `s` | servo 0° → 90° → 0° (aman untuk mekanisme) |
@@ -133,13 +149,14 @@ const int SERVO_FEED_DEG = 90;
 ## 7. Urutan tes yang disarankan
 
 1. **OLED**: cek alamat I2C, pastikan tampilan muncul.
-2. **DS18B20**: tekan `d`; cek suhu wajar. Kalau `--` atau -127, cek wiring/pull-up.
-3. **TDS**: tekan `t`; masukkan probe ke air. Cek nilai mV berubah. Jangan berharap ppm akurat tanpa kalibrasi.
-4. **Tombol**: tekan dan tahan >800 ms; Serial harus menampilkan long press dan feed test.
-5. **Buzzer**: tekan `b`.
-6. **Servo**: tekan `s`. Servo tidak bergerak saat boot; gerakan pertama baru terjadi setelah `s`. Kalau mekanisme terpasang, jangan tekan `x`.
-7. **Feed test**: tekan `f`; pastikan buzzer berbunyi sebelum servo bergerak.
-8. **Power test**: jalankan `f` beberapa kali; pastikan ESP32 tidak reset.
+2. **VL53L0X**: tekan `i`, pastikan `0x29` muncul; lalu tekan `v`, cek jarak dalam mm/cm.
+3. **DS18B20**: tekan `d`; cek suhu wajar. Kalau `--` atau -127, cek wiring/pull-up.
+4. **TDS**: tekan `t`; masukkan probe ke air. Cek nilai mV berubah. Jangan berharap ppm akurat tanpa kalibrasi.
+5. **Tombol**: tekan dan tahan >800 ms; Serial harus menampilkan long press dan feed test.
+6. **Buzzer**: tekan `b`.
+7. **Servo**: tekan `s`. Servo tidak bergerak saat boot; gerakan pertama baru terjadi setelah `s`. Kalau mekanisme terpasang, jangan tekan `x`.
+8. **Feed test**: tekan `f`; pastikan buzzer berbunyi sebelum servo bergerak.
+9. **Power test**: jalankan `f` beberapa kali; pastikan ESP32 tidak reset.
 
 ## 8. Troubleshooting
 
@@ -149,9 +166,19 @@ const int SERVO_FEED_DEG = 90;
 - Coba alamat 0x3D (sketch sudah mencoba).
 - Pastikan modul OLED memang I2C, bukan SPI.
 
+### VL53L0X tidak terdeteksi / `v` gagal
+- Cek VIN/VCC di **3,3 V**, bukan 5 V.
+- Cek GND common dengan ESP32.
+- Cek SDA ke GPIO21 dan SCL ke GPIO22, jangan tertukar.
+- Kalau ada pin XSHUT, hubungkan ke **3,3 V**; jangan ke GND.
+- Pastikan alamat `0x29` muncul saat menu `i`.
+- Kabel I2C sebaiknya pendek; jauhkan dari kabel servo.
+- Kalau `0x29` muncul tetapi `v` menghasilkan `out of range`, hadapkan sensor ke objek pada jarak 5–50 cm.
+
 ### DS18B20 membaca -127 °C
 - Cek VCC, GND, DATA.
-- Cek pull-up 4.7 kΩ di module. Kalau tidak ada, dua 10 kΩ paralel.
+- Cek pull-up 4,7 kΩ antara DATA dan 3,3 V. Kalau tidak ada, dua 10 kΩ paralel (= 5 kΩ) bisa dipakai.
+- Untuk probe + terminal block: pastikan resistor tidak seri dengan DATA dan tidak terpasang ke GND.
 - Coba kabel lebih pendek.
 
 ### TDS selalu 0 atau mentok
@@ -198,7 +225,7 @@ const int SERVO_FEED_DEG = 90;
 ## 9. Catatan
 
 - Sketch ini belum menguji Wi-Fi, Telegram, atau jadwal.
-- VL53L0X akan ditambahkan setelah disolder.
+- VL53L0X sudah dibaca sebagai jarak mentah (mm/cm). Belum ada logika level pakan atau ambang batas.
 - Servo tidak di-attach saat boot supaya tidak ada gerakan tak terduga. Servo baru bergerak saat perintah `s`, `f`, atau `x`.
 - Jangan menaruh ESP32, OLED, module TDS, atau module DS18B20 di dalam air. Hanya probe TDS dan probe DS18B20 yang boleh masuk air.
 - Kalau servo berdengung keras atau mekanisme macet, lepas daya servo segera.

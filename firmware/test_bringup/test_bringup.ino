@@ -1,9 +1,7 @@
 /*
  * TEST BRING-UP — Pakan Ikan Otomatis
  * ESP32 Dev Module + OLED SSD1306 + DS18B20 + TDS Meter V1.0
- * + Servo SG90 + tombol + buzzer pasif
- *
- * VL53L0X TIDAK diuji di sketch ini karena belum disolder.
+ * + VL53L0X ToF + Servo SG90 + tombol + buzzer pasif
  *
  * Target board : ESP32 Dev Module
  * ESP32 core   : 2.0.17 atau 3.x (API LEDC dipilih otomatis)
@@ -13,6 +11,7 @@
  *   h = help
  *   i = scan I2C
  *   d = baca DS18B20 sekarang
+ *   v = baca VL53L0X sekarang
  *   t = baca TDS sekarang
  *   b = tes buzzer
  *   s = servo 0 -> 90 -> 0 (aman untuk mekanisme)
@@ -25,6 +24,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_VL53L0X.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <ESP32Servo.h>
@@ -50,6 +50,16 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 bool oledReady = false;
 uint8_t oledAddress = 0x3C;
+
+// ---------------- VL53L0X ----------------
+Adafruit_VL53L0X vl53l0x;
+
+bool tofReady = false;
+bool tofValid = false;
+uint16_t lastDistanceMm = 0;
+uint8_t lastRangeStatus = 255;
+unsigned long lastTofReadMs = 0;
+const unsigned long TOF_READ_MS = 200;
 
 // ---------------- DS18B20 ----------------
 OneWire oneWire(PIN_DS18B20);
@@ -94,6 +104,10 @@ unsigned long lastDisplayMs = 0;
 void scanI2C();
 void initOLED();
 void updateDisplay();
+void initTOF();
+void updateTOF();
+void readTOFNow();
+const char* tofStatusText(uint8_t status);
 void updateDS18B20();
 void readDS18B20Now();
 void updateTDS();
@@ -121,10 +135,9 @@ void setup() {
   Serial.println();
   Serial.println("==========================================");
   Serial.println("  TEST BRING-UP PAKAN IKAN OTOMATIS");
-  Serial.println("  ESP32 + OLED + DS18B20 + TDS + SG90");
-  Serial.println("  Tombol + buzzer");
+  Serial.println("  ESP32 + OLED + DS18B20 + TDS + VL53L0X");
+  Serial.println("  Servo SG90 + tombol + buzzer");
   Serial.println("==========================================");
-  Serial.println("VL53L0X belum diuji di sketch ini.");
   Serial.println();
 
   pinMode(PIN_BUTTON, INPUT_PULLUP);
@@ -138,6 +151,9 @@ void setup() {
 
   // OLED
   initOLED();
+
+  // VL53L0X
+  initTOF();
 
   // DS18B20
   ds18b20.begin();
@@ -173,6 +189,7 @@ void setup() {
   printHelp();
 
   beep(2, 120);
+  updateTOF();
   updateDisplay();
 }
 
@@ -182,6 +199,7 @@ void setup() {
 void loop() {
   updateButton();
   updateDS18B20();
+  updateTOF();
 
   if (millis() - lastTdsReadMs >= 2000) {
     updateTDS();
@@ -263,7 +281,9 @@ void updateDisplay() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
 
-  display.println("TEST BRING-UP");
+  display.print("BRING-UP 0x");
+  display.println(oledAddress, HEX);
+
   display.print("Suhu  : ");
   if (isnan(lastTempC)) {
     display.println("--");
@@ -283,14 +303,21 @@ void updateDisplay() {
   display.print("TDS mV: ");
   display.println((unsigned long)lastTdsMv);
 
+  display.print("ToF   : ");
+  if (!tofReady) {
+    display.println("N/A");
+  } else if (!tofValid) {
+    display.println(lastRangeStatus == 4 ? "OUT" : "ERR");
+  } else {
+    display.print(lastDistanceMm / 10.0, 1);
+    display.println(" cm");
+  }
+
   display.print("Tombol: ");
   display.println(buttonStable == LOW ? "TEKAN" : "LEPAS");
 
   display.print("Servo : ");
   display.println("IDLE");
-
-  display.print("OLED  : 0x");
-  display.println(oledAddress, HEX);
 
   display.display();
 }
@@ -337,6 +364,99 @@ void readDS18B20Now() {
   // Lanjutkan konversi background supaya pembacaan otomatis tetap jalan.
   ds18b20.requestTemperatures();
   lastTempRequestMs = millis();
+}
+
+// ============================================================
+// VL53L0X
+// ============================================================
+void initTOF() {
+  Serial.println("VL53L0X: init di 0x29...");
+
+  if (!vl53l0x.begin()) {
+    tofReady = false;
+    Serial.println("VL53L0X TIDAK terdeteksi. Cek 3.3V, GND, SDA/SCL, dan XSHUT.");
+    return;
+  }
+
+  tofReady = true;
+  Serial.println("VL53L0X: OK di 0x29.");
+}
+
+const char* tofStatusText(uint8_t status) {
+  switch (status) {
+    case 0:   return "valid";
+    case 1:   return "sigma fail";
+    case 2:   return "signal fail";
+    case 3:   return "min range";
+    case 4:   return "out of range";
+    case 5:   return "hardware fail";
+    case 255: return "I2C error";
+    default:  return "unknown";
+  }
+}
+
+bool readTofMeasurement(uint16_t &distanceMm, uint8_t &rangeStatus) {
+  if (!tofReady) return false;
+
+  VL53L0X_RangingMeasurementData_t measure;
+  VL53L0X_Error err = vl53l0x.rangingTest(&measure, false);
+
+  if (err != VL53L0X_ERROR_NONE) {
+    rangeStatus = 255;
+    return false;
+  }
+
+  rangeStatus = measure.RangeStatus;
+  if (rangeStatus != 0) return false;
+
+  distanceMm = measure.RangeMilliMeter;
+  return true;
+}
+
+void updateTOF() {
+  if (!tofReady) return;
+  if (millis() - lastTofReadMs < TOF_READ_MS) return;
+
+  lastTofReadMs = millis();
+
+  uint16_t distance = 0;
+  uint8_t status = 255;
+  bool valid = readTofMeasurement(distance, status);
+
+  lastRangeStatus = status;
+
+  if (valid) {
+    lastDistanceMm = distance;
+    tofValid = true;
+  } else {
+    tofValid = false;
+  }
+}
+
+void readTOFNow() {
+  if (!tofReady) {
+    Serial.println("VL53L0X tidak siap. Cek wiring dan alamat 0x29.");
+    return;
+  }
+
+  uint16_t distance = 0;
+  uint8_t status = 255;
+  bool valid = readTofMeasurement(distance, status);
+
+  lastRangeStatus = status;
+  lastTofReadMs = millis();
+
+  if (valid) {
+    lastDistanceMm = distance;
+    tofValid = true;
+    Serial.printf("ToF: %u mm (%.1f cm), status=%u (%s)\n",
+                  (unsigned)distance, distance / 10.0,
+                  status, tofStatusText(status));
+  } else {
+    tofValid = false;
+    Serial.printf("ToF: tidak valid, status=%u (%s)\n",
+                  status, tofStatusText(status));
+  }
 }
 
 // ============================================================
@@ -616,6 +736,16 @@ void printAll() {
                   lastTdsPpm, (unsigned long)lastTdsMv);
   }
 
+  if (!tofReady) {
+    Serial.println("ToF    : TIDAK ADA");
+  } else if (!tofValid) {
+    Serial.printf("ToF    : tidak valid (status %u: %s)\n",
+                  lastRangeStatus, tofStatusText(lastRangeStatus));
+  } else {
+    Serial.printf("ToF    : %u mm (%.1f cm)\n",
+                  (unsigned)lastDistanceMm, lastDistanceMm / 10.0);
+  }
+
   Serial.printf("Tombol : %s\n", buttonStable == LOW ? "TEKAN" : "LEPAS");
   Serial.printf("OLED   : %s (0x%02X)\n", oledReady ? "OK" : "TIDAK ADA", oledAddress);
   Serial.printf("DS18B20: %s\n", dsReady ? "OK" : "TIDAK ADA");
@@ -627,6 +757,7 @@ void printHelp() {
   Serial.println("  h = help");
   Serial.println("  i = scan I2C");
   Serial.println("  d = baca DS18B20 sekarang");
+  Serial.println("  v = baca VL53L0X sekarang");
   Serial.println("  t = baca TDS sekarang");
   Serial.println("  b = tes buzzer");
   Serial.println("  s = servo 0 -> 90 -> 0 (aman)");
@@ -649,6 +780,10 @@ void handleCommand(char c) {
 
     case 'D':
       readDS18B20Now();
+      break;
+
+    case 'V':
+      readTOFNow();
       break;
 
     case 'T':

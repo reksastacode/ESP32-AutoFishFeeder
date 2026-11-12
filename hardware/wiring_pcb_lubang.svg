@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="980" viewBox="0 0 1400 980">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: bold 28px Arial, Helvetica, sans-serif; fill: #212529; }
+      .subtitle { font: 15px Arial, Helvetica, sans-serif; fill: #6c757d; }
+      .box { fill: #f8f9fa; stroke: #343a40; stroke-width: 2; rx: 10; }
+      .module { fill: #ffffff; stroke: #495057; stroke-width: 1.5; rx: 8; }
+      .modtitle { font: bold 17px Arial, Helvetica, sans-serif; fill: #212529; }
+      .modsub { font: 12px Arial, Helvetica, sans-serif; fill: #6c757d; }
+      .pin { font: 14px Arial, Helvetica, sans-serif; fill: #212529; }
+      .pinbold { font: bold 14px Arial, Helvetica, sans-serif; fill: #212529; }
+      .net { font: bold 12px Arial, Helvetica, sans-serif; fill: #ffffff; text-anchor: middle; }
+      .net3v3 { fill: #fd7e14; }
+      .net5v { fill: #dc3545; }
+      .netgnd { fill: #000000; }
+      .netsda { fill: #0d6efd; }
+      .netscl { fill: #198754; }
+      .netds { fill: #6f42c1; }
+      .nettds { fill: #8b5a2b; }
+      .netservo { fill: #d63384; }
+      .netbuzzer { fill: #6610f2; }
+      .netbutton { fill: #20c997; }
+      .note { font: 12px Arial, Helvetica, sans-serif; fill: #495057; }
+      .legend { font: 13px Arial, Helvetica, sans-serif; fill: #212529; }
+      .line { stroke: #adb5bd; stroke-width: 1.3; }
+      .dash { stroke: #adb5bd; stroke-width: 1; stroke-dasharray: 4 4; fill: none; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="980"/>
+
+  <text class="title" x="40" y="45">Skema Wiring PCB Lubang — Pakan Ikan Otomatis</text>
+  <text class="subtitle" x="40" y="72">Skema net-label: sambungkan pin yang punya nama net sama. Semua modul lewat header agar bisa dilepas.</text>
+
+  <!-- ================= ESP32 ================= -->
+  <rect class="box" x="40" y="120" width="280" height="650"/>
+  <text class="modtitle" x="60" y="155">ESP32 Dev Module</text>
+  <text class="modsub" x="60" y="176">30/38 pin — ikuti label di board</text>
+
+  <!-- ESP32 pin rows -->
+  <g>
+    <text class="pinbold" x="60" y="235">5V</text>
+    <line class="line" x1="230" y1="230" x2="345" y2="230"/>
+    <rect class="net5v" x="350" y="218" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="235">+5V</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="280">3V3</text>
+    <line class="line" x1="230" y1="275" x2="345" y2="275"/>
+    <rect class="net3v3" x="350" y="263" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="280">+3V3</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="325">GND</text>
+    <line class="line" x1="230" y1="320" x2="345" y2="320"/>
+    <rect class="netgnd" x="350" y="308" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="325">GND</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="370">GPIO21</text>
+    <line class="line" x1="230" y1="365" x2="345" y2="365"/>
+    <rect class="netsda" x="350" y="353" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="370">SDA</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="415">GPIO22</text>
+    <line class="line" x1="230" y1="410" x2="345" y2="410"/>
+    <rect class="netscl" x="350" y="398" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="415">SCL</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="460">GPIO4</text>
+    <line class="line" x1="230" y1="455" x2="345" y2="455"/>
+    <rect class="netds" x="350" y="443" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="460">DS_DATA</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="505">GPIO34</text>
+    <line class="line" x1="230" y1="500" x2="345" y2="500"/>
+    <rect class="nettds" x="350" y="488" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="505">TDS_AOUT</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="550">GPIO18</text>
+    <line class="line" x1="230" y1="545" x2="345" y2="545"/>
+    <rect class="netservo" x="350" y="533" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="550">SERVO_SIG</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="595">GPIO25</text>
+    <line class="line" x1="230" y1="590" x2="345" y2="590"/>
+    <rect class="netbuzzer" x="350" y="578" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="595">BUZZER</text>
+  </g>
+
+  <g>
+    <text class="pinbold" x="60" y="640">GPIO27</text>
+    <line class="line" x1="230" y1="635" x2="345" y2="635"/>
+    <rect class="netbutton" x="350" y="623" width="95" height="24" rx="5"/>
+    <text class="net" x="397.5" y="640">BUTTON</text>
+  </g>
+
+  <text class="note" x="60" y="705">GND: semua ground disatukan</text>
+  <text class="note" x="60" y="723">di titik dekat pin GND ESP32</text>
+  <text class="note" x="60" y="741">(star ground).</text>
+
+  <!-- ================= OLED ================= -->
+  <rect class="module" x="510" y="120" width="280" height="180"/>
+  <text class="modtitle" x="530" y="150">OLED SSD1306</text>
+  <text class="modsub" x="530" y="171">I2C 0x3C / 0x3D</text>
+
+  <text class="pin" x="530" y="200">VCC</text>
+  <line class="line" x1="700" y1="195" x2="790" y2="195"/>
+  <rect class="net3v3" x="795" y="183" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="200">+3V3</text>
+
+  <text class="pin" x="530" y="227">GND</text>
+  <line class="line" x1="700" y1="222" x2="790" y2="222"/>
+  <rect class="netgnd" x="795" y="210" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="227">GND</text>
+
+  <text class="pin" x="530" y="254">SDA</text>
+  <line class="line" x1="700" y1="249" x2="790" y2="249"/>
+  <rect class="netsda" x="795" y="237" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="254">SDA</text>
+
+  <text class="pin" x="530" y="281">SCL</text>
+  <line class="line" x1="700" y1="276" x2="790" y2="276"/>
+  <rect class="netscl" x="795" y="264" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="281">SCL</text>
+
+  <text class="note" x="530" y="292">Urutan pin ikuti label modul.</text>
+
+  <!-- ================= VL53L0X ================= -->
+  <rect class="module" x="510" y="305" width="280" height="200"/>
+  <text class="modtitle" x="530" y="335">VL53L0X</text>
+  <text class="modsub" x="530" y="356">I2C 0x29 — 3.3 V only</text>
+
+  <text class="pin" x="530" y="386">VIN</text>
+  <line class="line" x1="700" y1="381" x2="790" y2="381"/>
+  <rect class="net3v3" x="795" y="369" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="386">+3V3</text>
+
+  <text class="pin" x="530" y="413">GND</text>
+  <line class="line" x1="700" y1="408" x2="790" y2="408"/>
+  <rect class="netgnd" x="795" y="396" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="413">GND</text>
+
+  <text class="pin" x="530" y="440">SDA</text>
+  <line class="line" x1="700" y1="435" x2="790" y2="435"/>
+  <rect class="netsda" x="795" y="423" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="440">SDA</text>
+
+  <text class="pin" x="530" y="467">SCL</text>
+  <line class="line" x1="700" y1="462" x2="790" y2="462"/>
+  <rect class="netscl" x="795" y="450" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="467">SCL</text>
+
+  <text class="note" x="530" y="496">XSHUT: 3V3/NC; GPIO: NC.</text>
+
+  <!-- ================= DS18B20 ================= -->
+  <rect class="module" x="510" y="510" width="280" height="150"/>
+  <text class="modtitle" x="530" y="540">DS18B20 module</text>
+  <text class="modsub" x="530" y="561">Probe suhu — data GPIO4</text>
+
+  <text class="pin" x="530" y="591">VCC</text>
+  <line class="line" x1="700" y1="586" x2="790" y2="586"/>
+  <rect class="net3v3" x="795" y="574" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="591">+3V3</text>
+
+  <text class="pin" x="530" y="618">GND</text>
+  <line class="line" x1="700" y1="613" x2="790" y2="613"/>
+  <rect class="netgnd" x="795" y="601" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="618">GND</text>
+
+  <text class="pin" x="530" y="645">DATA</text>
+  <line class="line" x1="700" y1="640" x2="790" y2="640"/>
+  <rect class="netds" x="795" y="628" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="645">DS_DATA</text>
+
+  <!-- ================= TDS ================= -->
+  <rect class="module" x="510" y="680" width="280" height="200"/>
+  <text class="modtitle" x="530" y="710">TDS Meter V1.0</text>
+  <text class="modsub" x="530" y="731">AOUT ke GPIO34</text>
+
+  <text class="pin" x="530" y="761">VCC</text>
+  <line class="line" x1="700" y1="756" x2="790" y2="756"/>
+  <rect class="net3v3" x="795" y="744" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="761">+3V3</text>
+
+  <text class="pin" x="530" y="788">GND</text>
+  <line class="line" x1="700" y1="783" x2="790" y2="783"/>
+  <rect class="netgnd" x="795" y="771" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="788">GND</text>
+
+  <text class="pin" x="530" y="815">AOUT</text>
+  <line class="line" x1="700" y1="810" x2="790" y2="810"/>
+  <rect class="nettds" x="795" y="798" width="92" height="24" rx="5"/>
+  <text class="net" x="841" y="815">TDS_AOUT</text>
+
+  <text class="note" x="530" y="846">Default 3.3 V. 5 V hanya via selector,</text>
+  <text class="note" x="530" y="863">dan hanya jika AOUT ≤ 3.3 V.</text>
+
+  <!-- ================= SERVO ================= -->
+  <rect class="module" x="940" y="120" width="280" height="170"/>
+  <text class="modtitle" x="960" y="150">Servo SG90</text>
+  <text class="modsub" x="960" y="171">5 V — signal 3.3 V</text>
+
+  <text class="pinbold" x="960" y="204">S</text>
+  <text class="pin" x="985" y="204">(oranye/kuning)</text>
+  <line class="line" x1="1130" y1="199" x2="1220" y2="199"/>
+  <rect class="netservo" x="1225" y="187" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="204">SERVO_SIG</text>
+
+  <text class="pinbold" x="960" y="231">+</text>
+  <text class="pin" x="985" y="231">(merah)</text>
+  <line class="line" x1="1130" y1="226" x2="1220" y2="226"/>
+  <rect class="net5v" x="1225" y="214" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="231">+5V</text>
+
+  <text class="pinbold" x="960" y="258">−</text>
+  <text class="pin" x="985" y="258">(cokelat/hitam)</text>
+  <line class="line" x1="1130" y1="253" x2="1220" y2="253"/>
+  <rect class="netgnd" x="1225" y="241" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="258">GND</text>
+
+  <text class="note" x="960" y="283">Header male 3 pin: S / + / −.</text>
+
+  <!-- ================= CAPACITOR ================= -->
+  <rect class="module" x="940" y="320" width="280" height="140"/>
+  <text class="modtitle" x="960" y="350">Kapasitor 1000 µF</text>
+  <text class="modsub" x="960" y="371">≥ 10 V, dekat header servo</text>
+
+  <text class="pinbold" x="960" y="404">+</text>
+  <line class="line" x1="1130" y1="399" x2="1220" y2="399"/>
+  <rect class="net5v" x="1225" y="387" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="404">+5V</text>
+
+  <text class="pinbold" x="960" y="431">−</text>
+  <line class="line" x1="1130" y1="426" x2="1220" y2="426"/>
+  <rect class="netgnd" x="1225" y="414" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="431">GND</text>
+
+  <text class="note" x="960" y="455">Stripe di badan = negatif.</text>
+
+  <!-- ================= BUZZER ================= -->
+  <rect class="module" x="940" y="490" width="280" height="140"/>
+  <text class="modtitle" x="960" y="520">Buzzer pasif</text>
+  <text class="modsub" x="960" y="541">GPIO25 — PWM 2 kHz</text>
+
+  <text class="pinbold" x="960" y="574">+</text>
+  <line class="line" x1="1130" y1="569" x2="1220" y2="569"/>
+  <rect class="netbuzzer" x="1225" y="557" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="574">BUZZER</text>
+
+  <text class="pinbold" x="960" y="601">−</text>
+  <line class="line" x1="1130" y1="596" x2="1220" y2="596"/>
+  <rect class="netgnd" x="1225" y="584" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="601">GND</text>
+
+  <text class="note" x="960" y="621">220 Ω seri jika buzzer magnetic.</text>
+
+  <!-- ================= BUTTON ================= -->
+  <rect class="module" x="940" y="650" width="280" height="150"/>
+  <text class="modtitle" x="960" y="680">Tombol</text>
+  <text class="modsub" x="960" y="701">GPIO27 — INPUT_PULLUP</text>
+
+  <text class="pin" x="960" y="734">Kaki 1</text>
+  <line class="line" x1="1130" y1="729" x2="1220" y2="729"/>
+  <rect class="netbutton" x="1225" y="717" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="734">BUTTON</text>
+
+  <text class="pin" x="960" y="761">Kaki 2</text>
+  <line class="line" x1="1130" y1="756" x2="1220" y2="756"/>
+  <rect class="netgnd" x="1225" y="744" width="100" height="24" rx="5"/>
+  <text class="net" x="1275" y="761">GND</text>
+
+  <text class="note" x="960" y="786">4 kaki: pakai dua kaki diagonal.</text>
+
+  <!-- ================= NOTES ================= -->
+  <rect class="module" x="940" y="820" width="280" height="72"/>
+  <text class="note" x="960" y="846">Semua modul lewat female header,</text>
+  <text class="note" x="960" y="864">kecuali servo memakai male header.</text>
+  <text class="note" x="960" y="882">TDS VCC default 3.3 V.</text>
+
+  <!-- ================= LEGEND ================= -->
+  <line class="dash" x1="40" y1="900" x2="1360" y2="900"/>
+  <text class="legend" x="40" y="930">Legenda:</text>
+
+  <rect class="net5v" x="130" y="916" width="54" height="20" rx="4"/>
+  <text class="net" x="157" y="931">+5V</text>
+  <text class="legend" x="192" y="930">servo</text>
+
+  <rect class="net3v3" x="270" y="916" width="54" height="20" rx="4"/>
+  <text class="net" x="297" y="931">+3V3</text>
+  <text class="legend" x="332" y="930">sensor</text>
+
+  <rect class="netgnd" x="410" y="916" width="54" height="20" rx="4"/>
+  <text class="net" x="437" y="931">GND</text>
+  <text class="legend" x="472" y="930">ground bersama</text>
+
+  <rect class="netsda" x="610" y="916" width="54" height="20" rx="4"/>
+  <text class="net" x="637" y="931">SDA</text>
+  <text class="legend" x="672" y="930">GPIO21</text>
+
+  <rect class="netscl" x="770" y="916" width="54" height="20" rx="4"/>
+  <text class="net" x="797" y="931">SCL</text>
+  <text class="legend" x="832" y="930">GPIO22</text>
+
+  <rect class="netds" x="930" y="916" width="70" height="20" rx="4"/>
+  <text class="net" x="965" y="931">DS_DATA</text>
+  <text class="legend" x="1010" y="930">GPIO4</text>
+
+  <rect class="nettds" x="1100" y="916" width="82" height="20" rx="4"/>
+  <text class="net" x="1141" y="931">TDS_AOUT</text>
+  <text class="legend" x="1192" y="930">GPIO34</text>
+
+  <rect class="netservo" x="40" y="950" width="86" height="20" rx="4"/>
+  <text class="net" x="83" y="965">SERVO_SIG</text>
+  <text class="legend" x="136" y="964">GPIO18</text>
+
+  <rect class="netbuzzer" x="250" y="950" width="70" height="20" rx="4"/>
+  <text class="net" x="285" y="965">BUZZER</text>
+  <text class="legend" x="330" y="964">GPIO25</text>
+
+  <rect class="netbutton" x="440" y="950" width="70" height="20" rx="4"/>
+  <text class="net" x="475" y="965">BUTTON</text>
+  <text class="legend" x="520" y="964">GPIO27</text>
+
+  <text class="note" x="700" y="965">Tanda garis hanya penghubung visual; ikuti nama net.</text>
+</svg>
